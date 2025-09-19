@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hand Cricket Game</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --danger-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --dark-bg: #1a1a2e;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            --text-primary: #2d3748;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--primary-gradient);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+
+        .game-container {
+            backdrop-filter: blur(20px);
+            background: var(--glass-bg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            margin: 20px auto;
+            max-width: 900px;
+            padding: 2rem;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .game-title {
+            background: linear-gradient(45deg, #fff, #f0f8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.2rem;
+            font-weight: 300;
+        }
+
+        .score-board {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+        }
+
+        .player-score {
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .player-name {
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .score {
+            color: #667eea;
+            font-size: 2.5rem;
+            font-weight: 800;
+        }
+
+        .role-indicator {
+            background: var(--success-gradient);
+            border-radius: 20px;
+            color: white;
+            display: inline-block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            padding: 0.3rem 1rem;
+            text-transform: uppercase;
+        }
+
+        .bowling {
+            background: var(--danger-gradient);
+        }
+
+        .game-status {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .status-text {
+            color: var(--text-primary);
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .current-numbers {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 1rem 0;
+        }
+
+        .number-display {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: 800;
+            height: 80px;
+            width: 80px;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .number-display.match {
+            background: var(--danger-gradient);
+            animation: pulse 0.6s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .controls {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            padding: 2rem;
+        }
+
+        .number-buttons {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .number-btn {
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .number-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .number-btn:active {
+            transform: translateY(0);
+        }
+
+        .action-btn {
+            background: var(--success-gradient);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 1rem 2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+            width: 100%;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.4);
+        }
+
+        .action-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .toss-section {
+            text-align: center;
+        }
+
+        .toss-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin: 1rem 0;
+        }
+
+        .choice-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .game-over {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .winner-text {
+            color: #28a745;
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .final-scores {
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        .animate-in {
+            animation: slideInUp 0.5s ease-out;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .vs-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                margin: 10px;
+                padding: 1rem;
+            }
+            
+            .game-title {
+                font-size: 2rem;
+            }
+            
+            .number-buttons {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .current-numbers {
+                flex-direction: column;
+                align-items: center;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="game-container">
+            <div class="game-header">
+                <h1 class="game-title">
+                    <i class="fas fa-cricket-bat-ball"></i> Hand Cricket
+                </h1>
+                <p class="game-subtitle">Test your luck and strategy!</p>
+            </div>
+
+            <!-- Score Board -->
+            <div class="score-board" id="scoreBoard">
+                <div class="row">
+                    <div class="col-md-5">
+                        <div class="player-score">
+                            <div class="player-name">
+                                <i class="fas fa-user"></i> You
+                            </div>
+                            <div class="score" id="player1Score">0</div>
+                            <div class="role-indicator" id="player1Role">-</div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="vs-divider">VS</div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="player-score">
+                            <div class="player-name">
+                                <i class="fas fa-robot"></i> AI
+                            </div>
+                            <div class="score" id="player2Score">0</div>
+                            <div class="role-indicator" id="player2Role">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Status -->
+            <div class="game-status" id="gameStatus">
+                <div class="status-text" id="statusText">Welcome! Let's start with the toss.</div>
+                <div class="current-numbers" id="currentNumbers" style="display: none;">
+                    <div>
+                        <small style="color: #666;">You</small>
+                        <div class="number-display" id="player1Number">0</div>
+                    </div>
+                    <div>
+                        <small style="color: #666;">AI</small>
+                        <div class="number-display" id="player2Number">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Controls -->
+            <div class="controls" id="gameControls">
+                <!-- Toss Section -->
+                <div class="toss-section" id="tossSection">
+                    <h4 style="color: var(--text-primary); margin-bottom: 1rem;">Choose Odd or Even for the toss:</h4>
+                    <div class="toss-buttons">
+                        <button class="action-btn" onclick="startToss('odd')" style="width: auto; margin-right: 1rem;">
+                            <i class="fas fa-dice-one"></i> ODD
+                        </button>
+                        <button class="action-btn" onclick="startToss('even')" style="width: auto;">
+                            <i class="fas fa-dice-two"></i> EVEN
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Choice Section (Bat/Bowl) -->
+                <div class="choice-section" id="choiceSection" style="display: none;">
+                    <h4 style="color: var(--text-primary); margin-bottom: 1rem; text-align: center;">You won the toss! Choose:</h4>
+                    <div class="choice-buttons">
+                        <button class="action-btn" onclick="makeChoice('bat')" style="width: auto; margin-right: 1rem;">
+                            <i class="fas fa-baseball-bat-ball"></i> BAT
+                        </button>
+                        <button class="action-btn" onclick="makeChoice('bowl')" style="width: auto;">
+                            <i class="fas fa-bowling-ball"></i> BOWL
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Number Selection -->
+                <div class="number-selection" id="numberSelection" style="display: none;">
+                    <h4 style="color: var(--text-primary); margin-bottom: 1rem; text-align: center;">Choose your number:</h4>
+                    <div class="number-buttons" id="numberButtons">
+                        <button class="number-btn" onclick="playRound(1)">1</button>
+                        <button class="number-btn" onclick="playRound(2)">2</button>
+                        <button class="number-btn" onclick="playRound(3)">3</button>
+                        <button class="number-btn" onclick="playRound(4)">4</button>
+                        <button class="number-btn" onclick="playRound(5)">5</button>
+                        <button class="number-btn" onclick="playRound(6)">6</button>
+                        <button class="number-btn" onclick="playRound(7)">7</button>
+                        <button class="number-btn" onclick="playRound(8)">8</button>
+                        <button class="number-btn" onclick="playRound(9)">9</button>
+                        <button class="number-btn" onclick="playRound(10)">10</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Over Section -->
+            <div class="game-over" id="gameOver" style="display: none;">
+                <div class="winner-text" id="winnerText">Game Over!</div>
+                <div class="final-scores" id="finalScores"></div>
+                <button class="action-btn" onclick="resetGame()">
+                    <i class="fas fa-redo"></i> Play Again
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Game state
+        let gameState = {
+            phase: 'toss', // toss, choice, playing, gameOver
+            player1: { score: 0, role: '', isBatting: false },
+            player2: { score: 0, role: '', isBatting: false },
+            tossChoice: '',
+            currentInning: 1,
+            target: 0,
+            lastNumbers: { player1: 0, player2: 0 }
+        };
+
+        // Initialize game
+        function initGame() {
+            updateDisplay();
+        }
+
+        // Generate random number for AI
+        function getAINumber() {
+            return Math.floor(Math.random() * 10) + 1;
+        }
+
+        // Start toss
+        function startToss(choice) {
+            gameState.tossChoice = choice;
+            
+            // Generate random numbers for both players
+            const player1Num = Math.floor(Math.random() * 10) + 1;
+            const player2Num = getAINumber();
+            const sum = player1Num + player2Num;
+            const isOdd = sum % 2 === 1;
+            const result = isOdd ? 'odd' : 'even';
+            
+            // Show numbers
+            gameState.lastNumbers.player1 = player1Num;
+            gameState.lastNumbers.player2 = player2Num;
+            showCurrentNumbers();
+            
+            // Determine toss winner
+            const player1Wins = (choice === result);
+            
+            setTimeout(() => {
+                if (player1Wins) {
+                    document.getElementById('statusText').innerHTML = 
+                        `Toss Result: ${player1Num} + ${player2Num} = ${sum} (${result.toUpperCase()})<br>
+                        🎉 You won the toss!`;
+                    gameState.phase = 'choice';
+                    showChoiceSection();
+                } else {
+                    document.getElementById('statusText').innerHTML = 
+                        `Toss Result: ${player1Num} + ${player2Num} = ${sum} (${result.toUpperCase()})<br>
+                        🤖 AI won the toss and chose to bat first!`;
+                    
+                    // AI chooses to bat (simple strategy)
+                    gameState.player2.role = 'batting';
+                    gameState.player2.isBatting = true;
+                    gameState.player1.role = 'bowling';
+                    gameState.player1.isBatting = false;
+                    
+                    setTimeout(() => {
+                        gameState.phase = 'playing';
+                        showGamePlay();
+                    }, 2000);
+                }
+            }, 1500);
+        }
+
+        // Show choice section
+        function showChoiceSection() {
+            document.getElementById('tossSection').style.display = 'none';
+            document.getElementById('choiceSection').style.display = 'block';
+        }
+
+        // Make choice (bat or bowl)
+        function makeChoice(choice) {
+            if (choice === 'bat') {
+                gameState.player1.role = 'batting';
+                gameState.player1.isBatting = true;
+                gameState.player2.role = 'bowling';
+                gameState.player2.isBatting = false;
+                document.getElementById('statusText').innerHTML = 'You chose to bat first! 🏏';
+            } else {
+                gameState.player1.role = 'bowling';
+                gameState.player1.isBatting = false;
+                gameState.player2.role = 'batting';
+                gameState.player2.isBatting = true;
+                document.getElementById('statusText').innerHTML = 'You chose to bowl first! ⚾';
+            }
+            
+            setTimeout(() => {
+                gameState.phase = 'playing';
+                showGamePlay();
+            }, 1500);
+        }
+
+        // Show gameplay section
+        function showGamePlay() {
+            document.getElementById('choiceSection').style.display = 'none';
+            document.getElementById('numberSelection').style.display = 'block';
+            updateDisplay();
+            updateStatusForCurrentInning();
+        }
+
+        // Play a round
+        function playRound(playerNumber) {
+            const aiNumber = getAINumber();
+            
+            gameState.lastNumbers.player1 = playerNumber;
+            gameState.lastNumbers.player2 = aiNumber;
+            
+            showCurrentNumbers();
+            
+            // Check if numbers match (out)
+            if (playerNumber === aiNumber) {
+                // Player is out
+                setTimeout(() => {
+                    handleOut();
+                }, 1000);
+            } else {
+                // Add runs to batting player's score
+                setTimeout(() => {
+                    if (gameState.player1.isBatting) {
+                        gameState.player1.score += playerNumber;
+                        document.getElementById('statusText').innerHTML = 
+                            `You scored ${playerNumber} runs! Keep batting! 🏏`;
+                    } else {
+                        gameState.player2.score += aiNumber;
+                        document.getElementById('statusText').innerHTML = 
+                            `AI scored ${aiNumber} runs. Bowl your next ball! ⚾`;
+                    }
+                    
+                    updateDisplay();
+                    
+                    // Check if target is achieved in second innings
+                    if (gameState.currentInning === 2) {
+                        if (checkTargetReached()) {
+                            return; // End the round here if target is reached
+                        }
+                    }
+                }, 1000);
+            }
+        }
+
+        // Handle when player is out
+        function handleOut() {
+            const battingPlayer = gameState.player1.isBatting ? 'You' : 'AI';
+            
+            // Mark numbers as matching
+            document.getElementById('player1Number').classList.add('match');
+            document.getElementById('player2Number').classList.add('match');
+            
+            document.getElementById('statusText').innerHTML = 
+                `🔥 OUT! ${battingPlayer} scored the same number and got out!`;
+            
+            setTimeout(() => {
+                switchInnings();
+            }, 2000);
+        }
+
+        // Switch innings
+        function switchInnings() {
+            if (gameState.currentInning === 1) {
+                // Switch to second innings
+                gameState.currentInning = 2;
+                gameState.target = (gameState.player1.isBatting ? gameState.player1.score : gameState.player2.score) + 1;
+                
+                // Switch roles
+                gameState.player1.isBatting = !gameState.player1.isBatting;
+                gameState.player2.isBatting = !gameState.player2.isBatting;
+                gameState.player1.role = gameState.player1.isBatting ? 'batting' : 'bowling';
+                gameState.player2.role = gameState.player2.isBatting ? 'batting' : 'bowling';
+                
+                const newBatter = gameState.player1.isBatting ? 'You' : 'AI';
+                const target = gameState.target;
+                
+                document.getElementById('statusText').innerHTML = 
+                    `🔄 Innings changed! ${newBatter} need ${target} runs to win!`;
+                
+                updateDisplay();
+                hideCurrentNumbers();
+                
+                setTimeout(() => {
+                    updateStatusForCurrentInning();
+                }, 2000);
+            } else {
+                // Game over
+                endGame();
+            }
+        }
+
+        // Check if target is reached in second innings
+        function checkTargetReached() {
+            const battingScore = gameState.player1.isBatting ? gameState.player1.score : gameState.player2.score;
+            
+            if (battingScore >= gameState.target) {
+                const winner = gameState.player1.isBatting ? 'You' : 'AI';
+                document.getElementById('statusText').innerHTML = 
+                    `🎯 Target reached! ${winner} wins by ${battingScore - gameState.target + 1} run(s)!`;
+                
+                setTimeout(() => {
+                    endGame();
+                }, 2000);
+                return true; // Indicate game should end
+            }
+            return false; // Game continues
+        }
+
+        // End game
+        function endGame() {
+            gameState.phase = 'gameOver';
+            
+            let winner = '';
+            let winnerText = '';
+            
+            if (gameState.player1.score > gameState.player2.score) {
+                winner = 'You';
+                winnerText = '🎉 Congratulations! You Won!';
+            } else if (gameState.player2.score > gameState.player1.score) {
+                winner = 'AI';
+                winnerText = '🤖 AI Wins! Better luck next time!';
+            } else {
+                winnerText = '🤝 It\'s a Tie!';
+            }
+            
+            document.getElementById('winnerText').innerHTML = winnerText;
+            document.getElementById('finalScores').innerHTML = 
+                `Final Scores:<br>You: ${gameState.player1.score} | AI: ${gameState.player2.score}`;
+            
+            document.getElementById('gameControls').style.display = 'none';
+            document.getElementById('gameOver').style.display = 'block';
+            document.getElementById('gameOver').classList.add('animate-in');
+            
+            hideCurrentNumbers();
+        }
+
+        // Reset game
+        function resetGame() {
+            gameState = {
+                phase: 'toss',
+                player1: { score: 0, role: '', isBatting: false },
+                player2: { score: 0, role: '', isBatting: false },
+                tossChoice: '',
+                currentInning: 1,
+                target: 0,
+                lastNumbers: { player1: 0, player2: 0 }
+            };
+            
+            // Reset UI
+            document.getElementById('gameOver').style.display = 'none';
+            document.getElementById('gameControls').style.display = 'block';
+            document.getElementById('tossSection').style.display = 'block';
+            document.getElementById('choiceSection').style.display = 'none';
+            document.getElementById('numberSelection').style.display = 'none';
+            
+            // Reset status
+            document.getElementById('statusText').innerHTML = 'Welcome! Let\'s start with the toss.';
+            
+            hideCurrentNumbers();
+            updateDisplay();
+        }
+
+        // Update display
+        function updateDisplay() {
+            document.getElementById('player1Score').textContent = gameState.player1.score;
+            document.getElementById('player2Score').textContent = gameState.player2.score;
+            
+            const player1RoleElement = document.getElementById('player1Role');
+            const player2RoleElement = document.getElementById('player2Role');
+            
+            if (gameState.player1.role) {
+                player1RoleElement.textContent = gameState.player1.role.toUpperCase();
+                player1RoleElement.className = `role-indicator ${gameState.player1.isBatting ? 'batting' : 'bowling'}`;
+            } else {
+                player1RoleElement.textContent = '-';
+                player1RoleElement.className = 'role-indicator';
+            }
+            
+            if (gameState.player2.role) {
+                player2RoleElement.textContent = gameState.player2.role.toUpperCase();
+                player2RoleElement.className = `role-indicator ${gameState.player2.isBatting ? 'batting' : 'bowling'}`;
+            } else {
+                player2RoleElement.textContent = '-';
+                player2RoleElement.className = 'role-indicator';
+            }
+        }
+
+        // Show current numbers
+        function showCurrentNumbers() {
+            document.getElementById('player1Number').textContent = gameState.lastNumbers.player1;
+            document.getElementById('player2Number').textContent = gameState.lastNumbers.player2;
+            document.getElementById('currentNumbers').style.display = 'flex';
+            
+            // Remove any previous match classes
+            document.getElementById('player1Number').classList.remove('match');
+            document.getElementById('player2Number').classList.remove('match');
+        }
+
+        // Hide current numbers
+        function hideCurrentNumbers() {
+            document.getElementById('currentNumbers').style.display = 'none';
+        }
+
+        // Update status for current inning
+        function updateStatusForCurrentInning() {
+            const currentBatter = gameState.player1.isBatting ? 'You' : 'AI';
+            const currentBowler = gameState.player1.isBatting ? 'AI' : 'You';
+            
+            if (gameState.currentInning === 1) {
+                document.getElementById('statusText').innerHTML = 
+                    `🏏 First Innings: ${currentBatter} is batting, ${currentBowler} is bowling`;
+            } else {
+                const runsNeeded = gameState.target - (gameState.player1.isBatting ? gameState.player1.score : gameState.player2.score);
+                document.getElementById('statusText').innerHTML = 
+                    `🎯 Second Innings: ${currentBatter} needs ${Math.max(0, runsNeeded)} more runs to win!`;
+            }
+        }
+
+        // Initialize the game when page loads
+        document.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+</html>
